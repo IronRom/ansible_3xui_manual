@@ -1,0 +1,29 @@
+---
+- name: Enable ufw
+  ufw:
+    state: enabled
+
+
+- name: Open SSH port 22 (TCP)
+  ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+
+- name: Open port for panel (TCP)
+  ufw:
+    rule: allow
+    port: "{{ xui_port }}"
+    proto: tcp
+
+- name: Open port for panel (UDP)
+  ufw:
+    rule: allow
+    port: "{{ xui_port }}"
+    proto: udp
+
+- name: Open port for VLESS 443 (TCP)
+  ufw:
+    rule: allow
+    port: "443"
+    proto: tcp

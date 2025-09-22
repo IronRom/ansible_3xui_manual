@@ -1,0 +1,7 @@
+---
+- name: Run role
+  hosts: vpn
+  become: yes
+  become_method: sudo
+  roles:
+    - ../roles/3xui-panel

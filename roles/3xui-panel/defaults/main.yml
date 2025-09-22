@@ -1,0 +1,11 @@
+---
+# defaults file for 3xui-panel
+cert_dir: /srv/certs
+cert_key_path: "{{ cert_dir }}/{{ inventory_hostname }}.key"
+cert_crt_path: "{{ cert_dir }}/{{ inventory_hostname }}.crt"
+cert_csr_path: "{{ cert_dir }}/{{ inventory_hostname }}.csr"
+cert_days: 3650
+cert_common_name: "{{ ansible_host }}"
+cert_sans:
+  - "IP:{{ ansible_host }}"
+

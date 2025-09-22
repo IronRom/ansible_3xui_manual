@@ -1,0 +1,11 @@
+---
+- name: Set x-ui admin username and password
+  command: /usr/local/x-ui/x-ui setting -username {{ xui_username }} -password {{ xui_password }}
+
+- name: Set x-ui panel port
+  command: /usr/local/x-ui/x-ui setting -port {{ xui_port }}
+
+- name: Restart x-ui
+  service:
+    name: x-ui
+    state: restarted

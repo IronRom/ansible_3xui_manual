@@ -1,0 +1,14 @@
+---
+- import_tasks: update-os.yaml
+- import_tasks: 3xui-manual-install.yaml
+- import_tasks: firewall.yaml
+- import_tasks: 3xui-cli-login-port.yaml
+- import_tasks: get-ssigned-cert.yaml
+- import_tasks: 3xui-cli-set-cert.yaml
+- import_tasks: 3xui-api-create-inbound.yaml
+- import_tasks: ssh-disable-password.yaml
+
+
+
+
+

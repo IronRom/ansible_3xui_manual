@@ -1,0 +1,20 @@
+---
+- name: Install web certificate in x-ui
+  become: true
+  command: >
+    /usr/local/x-ui/x-ui cert
+    -webCertKey {{ cert_key_path }}
+    -webCert {{ cert_crt_path }}
+  args:
+    creates: /usr/local/x-ui/.cert_installed
+
+- name: Mark certificate as installed
+  file:
+    path: /usr/local/x-ui/.cert_installed
+    state: touch
+
+- name: Restart x-ui
+  service:
+    name: x-ui
+    enabled: true
+    state: restarted

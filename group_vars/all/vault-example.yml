@@ -1,0 +1,5 @@
+xui_username: "panel_username"
+xui_password: "panel_password"
+xui_port: 2053
+xray_private_key: "generated_xray_private_key"
+xray_public_key: "generated_xray_public_key"

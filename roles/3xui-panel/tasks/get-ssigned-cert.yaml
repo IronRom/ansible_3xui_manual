@@ -1,0 +1,79 @@
+---
+- name: Ensure cert directory exists
+  file:
+    path: "{{ cert_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create temporary openssl config with SAN
+  copy:
+    dest: "/tmp/openssl_{{ inventory_hostname }}.cnf"
+    content: |
+      [ req ]
+      default_bits        = 2048
+      prompt              = no
+      default_md          = sha256
+      req_extensions      = req_ext
+      distinguished_name  = dn
+
+      [ dn ]
+      C = US
+      ST = State
+      L = City
+      O = Organisation
+      OU = OrgUnit
+      CN = {{ cert_common_name }}
+
+      [ req_ext ]
+      subjectAltName = {{ cert_san_string | default('') }}
+
+      [ v3_ext ]
+      subjectAltName = {{ cert_san_string | default('') }}
+  vars:
+    cert_san_string: "{{ cert_sans | join(',') }}"
+
+- name: Generate private key and certificate signing request (key + csr)
+  command: >
+    openssl req -new
+    -config /tmp/openssl_{{ inventory_hostname }}.cnf
+    -keyout {{ cert_key_path }} -nodes -sha256 -out /tmp/{{ inventory_hostname }}.csr
+  args:
+    creates: "{{ cert_key_path }}"
+
+- name: Generate self-signed certificate using CSR and config
+  command: >
+    openssl x509 -req
+    -in /tmp/{{ inventory_hostname }}.csr
+    -signkey {{ cert_key_path }}
+    -days {{ cert_days }}
+    -extfile /tmp/openssl_{{ inventory_hostname }}.cnf
+    -extensions v3_ext
+    -out {{ cert_crt_path }}
+  args:
+    creates: "{{ cert_crt_path }}"
+
+- name: Set permissions on key and cert
+  file:
+    path: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+    owner: root
+    group: root
+  loop:
+    - { path: "{{ cert_key_path }}", mode: "0600" }
+    - { path: "{{ cert_crt_path }}", mode: "0644" }
+
+- name: Remove temporary CSR and config
+  file:
+    path: "/tmp/{{ item }}"
+    state: absent
+  loop:
+    - "openssl_{{ inventory_hostname }}.cnf"
+    - "{{ inventory_hostname }}.csr"
+
+- name: Restart x-ui (optional)
+  service:
+    name: x-ui
+    state: restarted
+  when: false

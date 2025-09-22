@@ -1,0 +1,55 @@
+---
+- name: Download latest x-ui release
+  get_url:
+    url: "https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-amd64.tar.gz"
+    dest: /root/x-ui-linux-amd64.tar.gz
+    mode: '0644'
+
+- name: Remove old x-ui directories and binary
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /root/x-ui
+    - /usr/local/x-ui
+    - /usr/bin/x-ui
+
+- name: Extract x-ui archive
+  unarchive:
+    src: /root/x-ui-linux-amd64.tar.gz
+    dest: /root/
+    remote_src: yes
+    extra_opts: [--overwrite]
+
+- name: Make binaries executable
+  file:
+    path: "{{ item }}"
+    mode: '0755'
+  loop:
+    - /root/x-ui/x-ui
+    - /root/x-ui/x-ui.sh
+#    - "{{ lookup('pipe', 'ls /root/x-ui/bin/xray-linux-amd64') | trim }}"
+
+- name: Copy x-ui.sh to /usr/bin
+  copy:
+    src: /root/x-ui/x-ui.sh
+    dest: /usr/bin/x-ui
+    mode: '0755'
+    remote_src: yes
+
+- name: Install systemd service
+  copy:
+    src: /root/x-ui/x-ui.service
+    dest: /etc/systemd/system/x-ui.service
+    mode: '0644'
+    remote_src: yes
+
+- name: Move x-ui directory to /usr/local
+  command: mv /root/x-ui /usr/local/
+  args:
+    removes: /root/x-ui
+    creates: /usr/local/x-ui
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
